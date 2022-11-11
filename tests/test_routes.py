@@ -124,3 +124,100 @@ class TestAccountService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     # ADD YOUR TEST CASES HERE ...
+
+    def test_list_accounts(self):
+        """It should return the list of account"""
+        account = AccountFactory()
+        response = self.client.get("/accounts")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 0)
+
+        # create an account and make sure it appears in the list
+        account = AccountFactory()
+        response = self.client.post(
+            BASE_URL,
+            json=account.serialize(),
+            content_type="application/json"
+        )
+        resp = self.app.get("/accounts")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 1)
+
+    def test_read_account(self):
+        """It should read an account"""
+
+        # Read from an empty database
+        get_response = self.client.get("/accounts/0")
+        self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
+        
+        # A normal use case
+        # First create an account to test
+        account = AccountFactory()
+        post_response = self.client.post(
+            BASE_URL,
+            json=account.serialize(),
+            content_type="application/json"
+        )
+
+        #Make sure the creation is successful
+        self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
+        new_account = post_response.get_json()
+
+        # Check the read result
+        get_response = self.client.get("/accounts/{new_account.id}"        )
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        ret_account = resp.get_json()
+        self.assertEqual(ret_account["id"], new_account.id)
+
+    def test_update_account(self):
+        """ It should Update an account """
+        # Read from an empty database
+        get_response = self.client.get("/accounts/0")
+        self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
+        
+        # Now add an account to test
+        account = AccountFactory()
+        post_response = self.client.post(
+            BASE_URL,
+            json=account.serialize(),
+            content_type="application/json"
+        )
+        
+        #Make sure the creation is successful
+        self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
+        new_account = post_response.get_json()
+
+        print(data)
+        self.assertEqual(new_account["name"], account.name)
+        new_account["name"] = "new_name"
+        
+        # now update it
+        resp = self.client.put(f"/accounts/{new_account.id}")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data["name"], "new_name")
+
+    def test_delete_account(self):
+        """ It should Delete a counter """
+        # Now add an account to test
+        account = AccountFactory()
+        post_response = self.client.post(
+            BASE_URL,
+            json=account.serialize(),
+            content_type="application/json"
+        )
+        
+        #Make sure the creation is successful
+        self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
+        new_account = post_response.get_json()
+
+        # Delete it twice should return the same
+        resp = self.client.delete(f"/accounts/{new_account.id}")
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        resp = self.client.delete(f"/accounts/{new_account.id}")
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        # Get it to make sure it's really gone
+        resp = self.client.get(f"/accounts/{new_account.id}")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
