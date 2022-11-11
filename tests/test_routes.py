@@ -232,3 +232,8 @@ class TestAccountService(TestCase):
         # Read from an empty database
         get_response = self.client.get("{BASE_URL}0")
         self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_method_not_allowed(self):
+        """It should not allow an illegal method call"""
+        resp = self.client.delete(BASE_URL)
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
