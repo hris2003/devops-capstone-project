@@ -128,7 +128,7 @@ class TestAccountService(TestCase):
     def test_list_accounts(self):
         """It should return the list of account"""
         account = AccountFactory()
-        resp = self.client.get("/accounts")
+        resp = self.client.get(f"{BASE_URL}")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 0)
@@ -140,7 +140,7 @@ class TestAccountService(TestCase):
             json=account.serialize(),
             content_type="application/json"
         )
-        resp = self.client.get("/accounts")
+        resp = self.client.get(f"{BASE_URL}")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 1)
@@ -149,7 +149,7 @@ class TestAccountService(TestCase):
         """It should read an account"""
 
         # Read from an empty database
-        get_response = self.client.get("/accounts/0")
+        get_response = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
         
         # A normal use case
@@ -164,18 +164,20 @@ class TestAccountService(TestCase):
         #Make sure the creation is successful
         self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
         new_account = post_response.get_json()
+        acc_id = new_account["id"]
 
         # Check the read result
-        get_response = self.client.get("/accounts/{new_account.id}"        )
-        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-        ret_account = resp.get_json()
-        self.assertEqual(ret_account["id"], new_account.id)
+        read_response = self.client.get(f"{BASE_URL}/{acc_id}")
+        self.assertEqual(read_response.status_code, status.HTTP_200_OK)
+        ret_account = read_response.get_json()
+        self.assertEqual(ret_account["id"], new_account["id"])
 
     def test_update_account(self):
         """ It should Update an account """
-        # Read from an empty database
-        get_response = self.client.get("/accounts/0")
-        self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
+        # Update non-existing account
+        resp = self.client.put(f"{BASE_URL}/0",json="{}",
+            content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         
         # Now add an account to test
         account = AccountFactory()
@@ -188,13 +190,14 @@ class TestAccountService(TestCase):
         #Make sure the creation is successful
         self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
         new_account = post_response.get_json()
+        acc_id = new_account["id"]
 
-        print(data)
         self.assertEqual(new_account["name"], account.name)
         new_account["name"] = "new_name"
         
         # now update it
-        resp = self.client.put(f"/accounts/{new_account.id}")
+        resp = self.client.put(f"{BASE_URL}/{acc_id}",json=new_account,
+            content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data["name"], "new_name")
@@ -212,12 +215,20 @@ class TestAccountService(TestCase):
         #Make sure the creation is successful
         self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
         new_account = post_response.get_json()
+        acc_id = new_account["id"]
 
         # Delete it twice should return the same
-        resp = self.client.delete(f"/accounts/{new_account.id}")
+        resp = self.client.delete(f"{BASE_URL}/{acc_id}")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
-        resp = self.client.delete(f"/accounts/{new_account.id}")
+        resp = self.client.delete(f"{BASE_URL}/{acc_id}")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         # Get it to make sure it's really gone
-        resp = self.client.get(f"/accounts/{new_account.id}")
+        resp = self.client.get(f"{BASE_URL}/{acc_id}")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_account_not_found(self):
+        """Test a non-existing account"""
+
+        # Read from an empty database
+        get_response = self.client.get("{BASE_URL}0")
+        self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
