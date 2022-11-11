@@ -128,19 +128,19 @@ class TestAccountService(TestCase):
     def test_list_accounts(self):
         """It should return the list of account"""
         account = AccountFactory()
-        response = self.client.get("/accounts")
+        resp = self.client.get("/accounts")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 0)
 
         # create an account and make sure it appears in the list
         account = AccountFactory()
-        response = self.client.post(
+        resp = self.client.post(
             BASE_URL,
             json=account.serialize(),
             content_type="application/json"
         )
-        resp = self.app.get("/accounts")
+        resp = self.client.get("/accounts")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 1)
