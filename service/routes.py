@@ -75,21 +75,52 @@ def list_accounts():
 # READ AN ACCOUNT
 ######################################################################
 
-# ... place you code here to READ an account ...
+@app.route("/accounts/<id>", methods=["GET"])
+def read_account(id):
+    """Reads a single account"""
+    app.logger.info("Request to Read account_id: %s...", id)
+    acc = Account.find(id)
+    
+    if acc is None:
+        return abort(status.HTTP_404_NOT_FOUND, f"Account {id} does not exist")
+
+    return acc.serialize()
+
 
 
 ######################################################################
 # UPDATE AN EXISTING ACCOUNT
 ######################################################################
 
-# ... place you code here to UPDATE an account ...
+@app.route("/accounts/<id>", methods=["PUT"])
+def update_account(id):
+    """Updates an account"""
+    app.logger.info("Request to Update account: %s...", id)
 
+    acc = Account.find(id)
+    
+    if acc is None:
+        return abort(status.HTTP_404_NOT_FOUND, f"Account {id} does not exist")
+
+    acc.deserialize(request.get_json())
+    acc.update()
+    return acc.serialize()
 
 ######################################################################
 # DELETE AN ACCOUNT
 ######################################################################
 
-# ... place you code here to DELETE an account ...
+@app.route("/accounts/<id>", methods=["DELETE"])
+def delete_account(id):
+    """Deletes an account"""
+    app.logger.info("Request to Delete account: %s...", id)
+
+    acc = Account.find(id)
+
+    if acc is not None:
+        acc.delete()
+
+    return "", status.HTTP_204_NO_CONTENT
 
 
 ######################################################################
