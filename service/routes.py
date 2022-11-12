@@ -61,6 +61,7 @@ def create_accounts():
 # LIST ALL ACCOUNTS
 ######################################################################
 
+
 @app.route("/accounts", methods=["GET"])
 def list_accounts():
     """Lists all accounts"""
@@ -70,22 +71,21 @@ def list_accounts():
 
     return jsonify(accounts)
 
-
 ######################################################################
 # READ AN ACCOUNT
 ######################################################################
+
 
 @app.route("/accounts/<id>", methods=["GET"])
 def read_account(id):
     """Reads a single account"""
     app.logger.info("Request to Read account_id: %s...", id)
     acc = Account.find(id)
-    
+
     if acc is None:
         return abort(status.HTTP_404_NOT_FOUND, f"Account {id} does not exist")
 
     return acc.serialize()
-
 
 
 ######################################################################
@@ -98,13 +98,14 @@ def update_account(id):
     app.logger.info("Request to Update account: %s...", id)
 
     acc = Account.find(id)
-    
+
     if acc is None:
         return abort(status.HTTP_404_NOT_FOUND, f"Account {id} does not exist")
 
     acc.deserialize(request.get_json())
     acc.update()
     return acc.serialize()
+
 
 ######################################################################
 # DELETE AN ACCOUNT
@@ -126,7 +127,6 @@ def delete_account(id):
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
-
 
 def check_content_type(media_type):
     """Checks that the media type is correct"""

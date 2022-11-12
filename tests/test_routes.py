@@ -151,7 +151,7 @@ class TestAccountService(TestCase):
         # Read from an empty database
         get_response = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
-        
+
         # A normal use case
         # First create an account to test
         account = AccountFactory()
@@ -161,7 +161,7 @@ class TestAccountService(TestCase):
             content_type="application/json"
         )
 
-        #Make sure the creation is successful
+        # Make sure the creation is successful
         self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
         new_account = post_response.get_json()
         acc_id = new_account["id"]
@@ -175,10 +175,9 @@ class TestAccountService(TestCase):
     def test_update_account(self):
         """ It should Update an account """
         # Update non-existing account
-        resp = self.client.put(f"{BASE_URL}/0",json="{}",
-            content_type="application/json")
+        resp = self.client.put(f"{BASE_URL}/0", json="{}", content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
-        
+
         # Now add an account to test
         account = AccountFactory()
         post_response = self.client.post(
@@ -186,18 +185,17 @@ class TestAccountService(TestCase):
             json=account.serialize(),
             content_type="application/json"
         )
-        
-        #Make sure the creation is successful
+
+        # Make sure the creation is successful
         self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
         new_account = post_response.get_json()
         acc_id = new_account["id"]
 
         self.assertEqual(new_account["name"], account.name)
         new_account["name"] = "new_name"
-        
+
         # now update it
-        resp = self.client.put(f"{BASE_URL}/{acc_id}",json=new_account,
-            content_type="application/json")
+        resp = self.client.put(f"{BASE_URL}/{acc_id}", json=new_account, content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data["name"], "new_name")
@@ -211,8 +209,8 @@ class TestAccountService(TestCase):
             json=account.serialize(),
             content_type="application/json"
         )
-        
-        #Make sure the creation is successful
+
+        # Make sure the creation is successful
         self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
         new_account = post_response.get_json()
         acc_id = new_account["id"]
