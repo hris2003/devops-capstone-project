@@ -82,6 +82,3 @@ spec:
         pip install -qr requirements.txt
         echo "***** Running nosetests with: $(params.args)"
         nosetests $(params.args)
-
-      
-
